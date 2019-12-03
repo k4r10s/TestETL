@@ -1,0 +1,12 @@
+# hadoop docker-compose
+sftp:
+    image: atmoz/sftp
+    volumes:
+        - .:/home/vinkOS/archivosVisitas
+    ports:
+        - "2222:22"
+    networks:
+      static-network:
+        ipv4_address: 172.17.0.10
+    command: usuario:vink0s:1001
+
