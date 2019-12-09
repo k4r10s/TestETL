@@ -1,8 +1,7 @@
 # Escenario ETL
 
-#### Escenario propuesto como solución de comunicación entre un SFTP y una base de datos MYSQL.
-
 ### Introducción
+
 Se solicito generar el proceso de un ETL para el consumo de archivos TXT con un formato definido desde un servidor SFTP a una base de datos MYSQL.
 
 Los datos proporcionados para el escenario fueron los siguientes:
