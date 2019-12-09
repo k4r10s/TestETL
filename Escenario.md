@@ -325,7 +325,107 @@ daily.sh
 
 Una vez establecida la automatización a través de crontab se tendría el escenario completo de extracción, tratamiento de datos y carga en base de datos.
 
-Está fue la solución generada para el escenario propuesto. Para ver la implementación consulte el archivo [README.md] (./README.md)
+Está fue la solución generada para el escenario propuesto. Para ver la implementación consulte el archivo [README.md](./README.md)
 
 ### HADOOP, HIVE e IMPALA
 
+Para replicar el proceso anterior con las tecnologías de big data, lo primero que tendría que hacer es ver de que manera puedo extraer la información del SFTP a través de Hadoop, para depositar los archivos en un ruta dentro del HDFS.
+
+En este caso, hubiera usado la herramienta DISTCP de hadoop, con la librería que extiende está herramienta para conectar a SFTP, se puede ver más información en la [documentación oficial](https://www.ibm.com/support/knowledgecenter/en/SSPT3X_3.0.0/com.ibm.swg.im.infosphere.biginsights.admin.doc/doc/c_sftp.html)
+
+El comando que hubiera utilizado para realizar el copiado de archivos desde el sftp a hadoop sería el siguiente:
+
+````sh
+hadoop distcp -delete -override
+  -D fs.sftp.credfile=/app/security/usercreds.prop
+  sftp://8.8.8.8/home/vinkOS/archivosVisitas/report_*.txt 
+  hdfs:///home/etl/loaded
+````
+
+De esta manera me traería todos los archivos de texto y los eliminaría en el mismo paso. Ya que tuviera los archivos en el directorio del hdfs ``/home/etl/loaded`` Lo siguiente sería realizar la carga mediante HIVE, como HIVE ya cuenta con la lógica para cargar archivos a través de la creación de sus tablas, lo que haría sería generar las tablas de la siguiente manera:
+
+````sql
+CREATE EXTERNAL TABLE estadisticas
+(
+    email STRING,
+    jyv STRING,
+    badmail STRING,
+    Baja STRING,
+    FechaEnvio STRING,
+    FechaOpen STRING,
+    Opens STRING,
+    OpensVirales STRING,
+    FechaClick STRING,
+    Clicks STRING,
+    ClicksVirales STRING,
+    Links STRING,
+    IPs STRING,
+    Navegadores STRING,
+    Plataformas STRING
+)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ‘,’
+LINES TERMINATED BY ‘\n’
+LOAD DATA LOCAL INPATH '/home/etl/loaded'
+;
+
+CREATE EXTERNAL visitante
+(
+    email STRING,
+    fechaPrimeraVisita STRING,
+    fechaUltimaVisita STRING,
+    visitasTotales INT,
+    visitasAnioActual INT,
+    visitasMesActual INT
+)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ‘,’
+LINES TERMINATED BY ‘\n’;
+
+CREATE EXTERNAL TABLE error
+(
+    email STRING,
+    jyv STRING,
+    badmail STRING,
+    Baja STRING,
+    FechaEnvio STRING,
+    FechaOpen STRING,
+    Opens STRING,
+    OpensVirales STRING,
+    FechaClick STRING,
+    Clicks STRING,
+    ClicksVirales STRING,
+    Links STRING,
+    IPs STRING,
+    Navegadores STRING,
+    Plataformas STRING
+)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ‘,’
+LINES TERMINATED BY ‘\n’
+;
+````
+
+Con las tablas creadas y los archivos en la ruta ``/home/etl/loaded`` los datos serían automáticamente cargados a hive. Lo que restaría sería rellenar las tablas visitante y error.
+
+Para rellenar la tabla de error ejecutaría el siguiente script.
+
+````sql
+    INSERT INTO TABLE error SELECT * FROM estadisticas
+    WHERE 
+        NOT(estadisticas.email rlike '^[a-zA-Z0-9.!#$%&*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$')
+      OR
+        NOT (estadisticas.FechaEnvio rlike '[0-9]{2}/[0-9]{2}/[0-9]{4} [0-9]{2}:[0-9]{2}')
+      OR
+        NOT (estadisticas.FechaOpen rlike '[0-9]{2}/[0-9]{2}/[0-9]{4} [0-9]{2}:[0-9]{2}')
+      OR
+        NOT (estadisticas.FechaClick rlike '[0-9]{2}/[0-9]{2}/[0-9]{4} [0-9]{2}:[0-9]{2}')
+````
+
+posteriormente generaría un trigger parecido al creado en mysql para insertar dentro de la tabla visitante.
+
+por último haría una copia de los archivos de la ruta ``/home/etl/loaded`` a la ruta ``/home/etl/visitas/bckp/`` y realizaría el zipeado y la eliminación de archivos mediante un shell script.
+
+como los archivos se van a cargar desde ``/home/etl/loaded`` a hive, no haría más que la copia para tener el backup en zip. aunque el respaldo de la información ya se encontraría en esa carpeta y en hive.
+
+Para la automatización de proceso ocuparía la herramienta Oozie de Hadoop, realizaría un flujo de trabajo para automatizar la extracción diaria. Así mismo realizaría un flujo de trabajo para la actualización de contadores por año y por mes. Por último lo agregaría todos los flujos en un programa y establecería el inicio y fin para la ejecución de flujos de trabajo.
