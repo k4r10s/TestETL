@@ -69,7 +69,7 @@ docker exec -it escenario1_pentaho_1 spoon.sh
 Sin interfaz gráfica la forma de ejecutar el proyecto sería la siguiente:
 
 ````sh
-docker exec -it escenario1_pentaho_1 kitchen.sh -file="/home/kettle/sample/logs/sample.ktr"
+docker exec -it escenario1_pentaho_1 kitchen.sh -file="/app/jobs/sftpjob.kjb"
 ````
 Antes de comenzar la ejecución del escenario es necesario agregar los archivos txt de la carpeta ``Examem/txt`` en la carpeta ``escenario1/archivos`` esto solo si la carpeta ``escenario1/archivos`` se encuentra vacía.
 

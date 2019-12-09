@@ -12,6 +12,61 @@
   <modified_date>2019/12/08 04:24:11.792</modified_date>
   <parameters>
     </parameters>
+  <connection>
+    <name>MysqlDB</name>
+    <server>8.8.8.2</server>
+    <type>MYSQL</type>
+    <access>Native</access>
+    <database>visitas</database>
+    <port>3306</port>
+    <username>examen</username>
+    <password>Encrypted 2be98afc86aa7f2e4cb79ab68df9faad4</password>
+    <servername />
+    <data_tablespace />
+    <index_tablespace />
+    <attributes>
+      <attribute>
+        <code>FORCE_IDENTIFIERS_TO_LOWERCASE</code>
+        <attribute>N</attribute>
+      </attribute>
+      <attribute>
+        <code>FORCE_IDENTIFIERS_TO_UPPERCASE</code>
+        <attribute>N</attribute>
+      </attribute>
+      <attribute>
+        <code>IS_CLUSTERED</code>
+        <attribute>N</attribute>
+      </attribute>
+      <attribute>
+        <code>PORT_NUMBER</code>
+        <attribute>3306</attribute>
+      </attribute>
+      <attribute>
+        <code>PRESERVE_RESERVED_WORD_CASE</code>
+        <attribute>Y</attribute>
+      </attribute>
+      <attribute>
+        <code>QUOTE_ALL_FIELDS</code>
+        <attribute>N</attribute>
+      </attribute>
+      <attribute>
+        <code>STREAM_RESULTS</code>
+        <attribute>Y</attribute>
+      </attribute>
+      <attribute>
+        <code>SUPPORTS_BOOLEAN_DATA_TYPE</code>
+        <attribute>Y</attribute>
+      </attribute>
+      <attribute>
+        <code>SUPPORTS_TIMESTAMP_DATA_TYPE</code>
+        <attribute>Y</attribute>
+      </attribute>
+      <attribute>
+        <code>USE_POOLING</code>
+        <attribute>N</attribute>
+      </attribute>
+    </attributes>
+  </connection>
   <slaveservers>
     </slaveservers>
   <job-log-table>
@@ -354,6 +409,47 @@
       <yloc>32</yloc>
     </entry>
     <entry>
+      <name>Delete files</name>
+      <description />
+      <type>DELETE_FILES</type>
+      <arg_from_previous>N</arg_from_previous>
+      <include_subfolders>N</include_subfolders>
+      <fields>
+        <field>
+          <name>/home/etl/visitas/bckp</name>
+          <filemask>report_[0-9]+\.txt</filemask>
+        </field>
+      </fields>
+      <parallel>N</parallel>
+      <draw>Y</draw>
+      <nr>0</nr>
+      <xloc>608</xloc>
+      <yloc>32</yloc>
+    </entry>
+    <entry>
+      <name>mover archivos</name>
+      <description />
+      <type>SHELL</type>
+      <filename>/app/scripts/loaded.sh</filename>
+      <work_directory />
+      <arg_from_previous>N</arg_from_previous>
+      <exec_per_row>N</exec_per_row>
+      <set_logfile>N</set_logfile>
+      <logfile />
+      <set_append_logfile>N</set_append_logfile>
+      <logext />
+      <add_date>N</add_date>
+      <add_time>N</add_time>
+      <insertScript>N</insertScript>
+      <script />
+      <loglevel>Basic</loglevel>
+      <parallel>N</parallel>
+      <draw>Y</draw>
+      <nr>0</nr>
+      <xloc>432</xloc>
+      <yloc>32</yloc>
+    </entry>
+    <entry>
       <name>Zip file</name>
       <description />
       <type>ZIP_FILE</type>
@@ -375,24 +471,6 @@
       <createMoveToDirectory>N</createMoveToDirectory>
       <include_subfolders>Y</include_subfolders>
       <stored_source_path_depth />
-      <parallel>N</parallel>
-      <draw>Y</draw>
-      <nr>0</nr>
-      <xloc>448</xloc>
-      <yloc>32</yloc>
-    </entry>
-    <entry>
-      <name>Delete files</name>
-      <description />
-      <type>DELETE_FILES</type>
-      <arg_from_previous>N</arg_from_previous>
-      <include_subfolders>N</include_subfolders>
-      <fields>
-        <field>
-          <name>/home/etl/visitas/bckp</name>
-          <filemask>report_[0-9]+\.txt</filemask>
-        </field>
-      </fields>
       <parallel>N</parallel>
       <draw>Y</draw>
       <nr>0</nr>
@@ -420,26 +498,19 @@
       <yloc>32</yloc>
     </entry>
     <entry>
-      <name>mover archivos</name>
+      <name>SQL</name>
       <description />
-      <type>SHELL</type>
-      <filename>/app/scripts/loaded.sh</filename>
-      <work_directory />
-      <arg_from_previous>N</arg_from_previous>
-      <exec_per_row>N</exec_per_row>
-      <set_logfile>N</set_logfile>
-      <logfile />
-      <set_append_logfile>N</set_append_logfile>
-      <logext />
-      <add_date>N</add_date>
-      <add_time>N</add_time>
-      <insertScript>N</insertScript>
-      <script />
-      <loglevel>Basic</loglevel>
+      <type>SQL</type>
+      <sql />
+      <useVariableSubstitution>F</useVariableSubstitution>
+      <sqlfromfile>T</sqlfromfile>
+      <sqlfilename>/app/scripts/errores.sql</sqlfilename>
+      <sendOneStatement>F</sendOneStatement>
+      <connection>MysqlDB</connection>
       <parallel>N</parallel>
       <draw>Y</draw>
       <nr>0</nr>
-      <xloc>368</xloc>
+      <xloc>352</xloc>
       <yloc>32</yloc>
     </entry>
   </entries>
@@ -472,8 +543,8 @@
       <unconditional>Y</unconditional>
     </hop>
     <hop>
-      <from>Transformation</from>
-      <to>mover archivos</to>
+      <from>mover archivos</from>
+      <to>Zip file</to>
       <from_nr>0</from_nr>
       <to_nr>0</to_nr>
       <enabled>Y</enabled>
@@ -481,8 +552,17 @@
       <unconditional>N</unconditional>
     </hop>
     <hop>
-      <from>mover archivos</from>
-      <to>Zip file</to>
+      <from>Transformation</from>
+      <to>SQL</to>
+      <from_nr>0</from_nr>
+      <to_nr>0</to_nr>
+      <enabled>Y</enabled>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+    </hop>
+    <hop>
+      <from>SQL</from>
+      <to>mover archivos</to>
       <from_nr>0</from_nr>
       <to_nr>0</to_nr>
       <enabled>Y</enabled>
