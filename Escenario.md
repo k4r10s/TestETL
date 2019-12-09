@@ -428,4 +428,4 @@ por último haría una copia de los archivos de la ruta ``/home/etl/loaded`` a l
 
 como los archivos se van a cargar desde ``/home/etl/loaded`` a hive, no haría más que la copia para tener el backup en zip. aunque el respaldo de la información ya se encontraría en esa carpeta y en hive.
 
-Para la automatización de proceso ocuparía la herramienta Oozie de Hadoop, realizaría un flujo de trabajo para automatizar la extracción diaria. Así mismo realizaría un flujo de trabajo para la actualización de contadores por año y por mes. Por último lo agregaría todos los flujos en un programa y establecería el inicio y fin para la ejecución de flujos de trabajo.
+Para la automatización de proceso ocuparía la herramienta Oozie de Hadoop, realizaría un flujo de trabajo para automatizar la extracción diaria. Así mismo realizaría un flujo de trabajo para la actualización de contadores por año y por mes. Por último lo agregaría todos los flujos en un programa y establecería el inicio y fin para la ejecución de los flujos de trabajo.
