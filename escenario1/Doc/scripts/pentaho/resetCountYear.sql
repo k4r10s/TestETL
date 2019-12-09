@@ -1,0 +1,1 @@
+update visitante SET visitasAnioActual = 0;

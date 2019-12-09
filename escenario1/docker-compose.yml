@@ -1,12 +1,55 @@
-# hadoop docker-compose
-sftp:
-    image: atmoz/sftp
-    volumes:
-        - .:/home/vinkOS/archivosVisitas
-    ports:
-        - "2222:22"
-    networks:
-      static-network:
-        ipv4_address: 172.17.0.10
-    command: usuario:vink0s:1001
+# services pentaho
+version: '3'
+services:
+    sftp:
+        image: atmoz/sftp
+        volumes:
+            - ./archivos:/home/usuario/home/vinkOS/archivosVisitas:rw
+            - ./Doc/scripts/SFTP:/etc/sftp.d
+        ports:
+            - "2222:22"
+        command: ["usuario:vink0s:1001"]
+        networks:
+            vpcbr:
+                ipv4_address: 8.8.8.8
+    db:
+        image: mysql
+        command: --default-authentication-plugin=mysql_native_password
+        volumes:
+            - ./Doc/scripts/DQL:/docker-entrypoint-initdb.d
+            - ./loaded:/home/etl/loaded
+        environment:
+            MYSQL_ROOT_PASSWORD: examenRoot
+            MYSQL_DATABASE: visitas
+            MYSQL_USER: examen
+            MYSQL_PASSWORD: examen
+        networks:
+            vpcbr:
+                ipv4_address: 8.8.8.2
+        depends_on:
+            - sftp 
+    pentaho:
+        build: ./Doc/docker/pentaho
+        volumes:
+            - ./Doc/jobs:/app/jobs
+            - ./Doc/transformations:/app/transformations
+            - ./Doc/scripts/pentaho:/app/scripts
+            - ./loaded:/home/etl/loaded:rw
+            - ./backup:/home/etl/visitas/bckp:rw
+            - /tmp/.X11-unix/:/tmp/.X11-unix/:ro
+            - /home/k4rl0s/.Xauthority:/root/.Xauthority:rw
+        environment:
+            XAUTH: "5773c320f754bd10d40cfaa2da14740e"
+            DISPLAY: ":0"
+        ports:
+            - "8080:8080"
+        network_mode: "host"
+        depends_on:
+            - db
 
+networks:
+  vpcbr:
+    driver: bridge
+    ipam:
+     config:
+       - subnet: 8.8.8.0/24
