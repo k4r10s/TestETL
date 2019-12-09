@@ -77,4 +77,4 @@ Antes de comenzar la ejecución del escenario es necesario agregar los archivos 
 
 Los trabajos y transformaciones los podemos encontrar en la ruta ``escenario1/Doc/jobs`` Las transformaciones las podemos ubicar en la ruta ``escenario1/Doc/transformations``. Los scripts que se ocuparon dentro de los procesos de los jobs y transformaciones se pueden encontrar en la ruta ``escenario1/Doc/scripts``
 
-Para más información del escenario lease el documento Escenario.md
+Para más información del escenario lease el documento [Escenario.md](./Escenario.md)
